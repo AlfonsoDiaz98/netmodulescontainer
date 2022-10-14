@@ -10,11 +10,11 @@ $file = Get-Item -Path $filePath;
 $uri = New-Object System.Uri("$urlFtp/$($file.Name)");
 
 $request = ([System.Net.FtpWebRequest])::Create($uri);
-$request.Method = [System.Net.WebRequestMethods+Ftp]::UploadFile
+$request.Method = [System.Net.WebRequestMethods+Ftp]::UploadFile;
 $request.Credentials = New-Object System.Net.NetworkCredential($userFtp,$passFtp);
 
-$request.EnableSsl = 'true';
-$fileBytes = [System.IO.File]::ReadAllBytes($filePath)
+#$request.EnableSsl = 'true';
+$fileBytes = [System.IO.File]::ReadAllBytes($filePath);
 $request.ContentLength = $fileBytes.Length;
 $requestStream = $request.GetRequestStream();
 
