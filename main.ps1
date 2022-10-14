@@ -1,14 +1,15 @@
 param(
-		[string] $urlFtp, 
+		[string] $urlFtps, 
 		[string] $userFtp, 
 		[string] $passFtp
 )
+$urlFtp = $urlFtps.Replace('ftps', 'ftp');
 $currentPath = Get-Location;
 $filePath =  "$currentPath/samplefile.txt";
 $file = Get-Item -Path $filePath;
 $uri = New-Object System.Uri("$urlFtp/$($file.Name)");
 
-$request = [System.Net.FtpWebRequest]([System.Net.WebRequest])::Create($uri);
+$request = [System.Net.FtpsWebRequest]([System.Net.WebRequest])::Create($uri);
 $request.Method = [System.Net.WebRequestMethods+Ftp]::UploadFile
 $request.Credentials = New-Object System.Net.NetworkCredential($userFtp,$passFtp);
 
