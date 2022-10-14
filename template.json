@@ -1,0 +1,363 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "The datacenter to use for the deployment."
+            }
+        },
+        "iotHubName": {
+            "type": "string",
+            "metadata": {
+                "description": "Define the project name or prefix for all objects."
+            }
+        },
+        "provisioningServiceName": {
+            "type": "string",
+            "metadata": {
+                "description": "Specify the name of the provisioning service."
+            }
+        },
+        "storageAccountName": {
+            "type": "string",
+            "maxLength": 24,
+            "minLength": 3,
+            "metadata": {
+                "description": "Specify the name of the storage Account service."
+            }
+        },
+
+        "skuName": {
+            "type": "string",
+            "metadata": {
+                "description": "The SKU to use for the IoT Hub."
+            }
+        },
+        "skuUnits": {
+            "type": "int",
+            "metadata": {
+                "description": "The number of IoT Hub units."
+            }
+        },
+        "d2cPartitions": {
+            "type": "int",
+            "metadata": {
+                "description": "Partitions used for the event stream."
+            }
+        },
+        "subscriptionid": {
+            "type": "string"
+        },
+        "serverFarmResourceGroup": {
+            "type": "string"
+        },
+
+        "optionsPlanAppService": {
+            "type": "String",
+            "metadata": {
+                "description": "options Plan App Service."
+            }
+        },
+        "appServicePlanlNameNew": {
+            "type": "string",
+            "defaultValue": "plan",
+            "minLength": 2,
+            "metadata": {
+                "description": "app service plan name."
+            }
+        },
+        "appServicePlanlNameExist": {
+            "type": "string",
+            "defaultValue": "plan",
+            "minLength": 2,
+            "metadata": {
+                "description": "app service plan name."
+            }
+        },
+        "kindOptions": {
+            "type": "string",
+            "defaultValue": "app,linux,container",
+            "metadata": {
+                "description": "app service plan name."
+            }
+        },
+        "sku": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "The SKU of App Service Plan."
+            }
+        },
+        "webAppName": {
+            "type": "string",
+            "defaultValue": "",
+            "minLength": 2,
+            "metadata": {
+                "description": "Web app name."
+            }
+        }
+    },
+    "variables": {
+        "iotHubKey": "iothubowner",
+        "routesName": "[format('{0}StorageRoute', toLower(parameters('iotHubName')))]",
+        "iotHubName": "[format('{0}Hub', parameters('iotHubName'))]",
+        "storageAccountName": "[parameters('storageAccountName')]",
+        "storageEndpoint": "[format('{0}StorageEndpont', parameters('iotHubName'))]",
+        "storageContainerName": "defaults",
+
+        "locationGroup": "[parameters('location')]",
+        "optionsPlanAppService": "[parameters('optionsPlanAppService')]",
+        "webAppName": "[concat('webApp-',parameters('webAppName'))]",
+        "appServicePlanPortalName": "[if(equals(variables('optionsPlanAppService'),'true'),parameters('appServicePlanlNameNew'),parameters('appServicePlanlNameExist'))]",
+        "kind": "[parameters('kindOptions')]",
+        "skuweb": "[parameters('sku')]",
+
+        "serverFarmIdNew": "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanPortalName'))]",
+        "serverFarmIdExist": "[concat('/subscriptions/',parameters('subscriptionId'),'/resourcegroups/', parameters('serverFarmResourceGroup'),'/providers/Microsoft.Web/serverfarms/', parameters('appServicePlanlNameExist'))]",
+        "serverFarmId": "[if(equals(variables('optionsPlanAppService'),'true'),variables('serverFarmIdNew'),variables('serverFarmIdExist'))]",
+
+        "defaultStorageName": "efferentdev",
+        "defaultStorageKey": "izikb23/CF62pq1J1RKG/RkhgDD7Stt52v6hpXxP3WFxiXacKNFKHTQ8By3eCzD3RukVZhkLlTsvSuJNzFjYCg==",
+        "defaultContainerName": "smartlinkarmdefault"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2021-08-01",
+            "name": "[variables('storageAccountName')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Standard_LRS"
+            },
+            "kind": "Storage"
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "apiVersion": "2021-09-01",
+            "name": "[format('{0}/default/{1}', variables('storageAccountName'), variables('storageContainerName'))]",
+            "properties": {
+                "publicAccess": "None"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Devices/IotHubs",
+            "apiVersion": "2021-07-02",
+            "name": "[variables('iotHubName')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "[parameters('skuName')]",
+                "capacity": "[parameters('skuUnits')]"
+            },
+            "properties": {
+                "eventHubEndpoints": {
+                    "events": {
+                        "retentionTimeInDays": 1,
+                        "partitionCount": "[parameters('d2cPartitions')]"
+                    }
+                },
+                "routing": {
+                    "endpoints": {
+                        "storageContainers": [
+                            {
+                                "connectionString": "[format('DefaultEndpointsProtocol=https;AccountName={0};EndpointSuffix={1};AccountKey={2}', variables('storageAccountName'), environment().suffixes.storage, listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2021-08-01').keys[0].value)]",
+                                "containerName": "[variables('storageContainerName')]",
+                                "fileNameFormat": "{iothub}/{partition}/{YYYY}/{MM}/{DD}/{HH}/{mm}",
+                                "batchFrequencyInSeconds": 100,
+                                "maxChunkSizeInBytes": 104857600,
+                                "encoding": "JSON",
+                                "name": "[variables('storageEndpoint')]"
+                            }
+                        ]
+                    },
+                    "routes": [
+                        {
+                            "name": "[variables('routesName')]",
+                            "source": "DeviceMessages",
+                            "condition": "level=\"storage\"",
+                            "endpointNames": [
+                                "[variables('storageEndpoint')]"
+                            ],
+                            "isEnabled": true
+                        }
+                    ],
+                    "fallbackRoute": {
+                        "name": "$fallback",
+                        "source": "DeviceMessages",
+                        "condition": "true",
+                        "endpointNames": [
+                            "events"
+                        ],
+                        "isEnabled": true
+                    }
+                },
+                "messagingEndpoints": {
+                    "fileNotifications": {
+                        "lockDurationAsIso8601": "PT1M",
+                        "ttlAsIso8601": "PT1H",
+                        "maxDeliveryCount": 10
+                    }
+                },
+                "enableFileUploadNotifications": false,
+                "cloudToDevice": {
+                    "maxDeliveryCount": 10,
+                    "defaultTtlAsIso8601": "PT1H",
+                    "feedback": {
+                        "lockDurationAsIso8601": "PT1M",
+                        "ttlAsIso8601": "PT1H",
+                        "maxDeliveryCount": 10
+                    }
+                }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Resources/deploymentScripts",
+            "apiVersion": "2020-10-01",
+            "name": "generateSasToken",
+            "location": "[resourceGroup().location]",
+            "kind": "AzurePowerShell",
+            "properties": {
+                "azPowerShellVersion": "7.0.6",
+                "forceUpdateTag": "1",
+                "arguments": "[format('{0} {1} {2}', variables('defaultStorageName'), variables('defaultStorageKey'),variables('defaultContainerName'))]",
+                "scriptContent": "$defaultStorageName = $args[0]; $defaultStorageKey = $args[1]; $defaultContainerName = $args[2]; $expiry = [DateTime]::Today.AddDays(+1); $context = New-AzStorageContext -StorageAccountName $defaultStorageName -StorageAccountKey $defaultStorageKey -Protocol 'https'; $DeploymentScriptOutputs = @{}; $DeploymentScriptOutputs['token'] = New-AzStorageContainerSASToken -Context $context -Name $defaultContainerName -Permission 'r' -ExpiryTime $expiry;",
+                "storageAccountSettings": {
+                    "storageAccountKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts',  variables('storageAccountName')), '2021-08-01').keys[0].value]",
+                    "storageAccountName": "[variables('storageAccountName')]"
+                },
+                "timeout": "PT30M",
+                "cleanupPreference": "Always",
+                "retentionInterval": "P1D"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Resources/deploymentScripts",
+            "apiVersion": "2020-10-01",
+            "name": "generateCertificate",
+            "location": "[resourceGroup().location]",
+            "kind": "AzurePowerShell",
+            "properties": {
+                "azPowerShellVersion": "7.0.6",
+                "forceUpdateTag": "1",
+                "arguments": "[format('{0} {1} {2}', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2021-08-01').keys[0].value, variables('storageAccountName'), variables('storageContainerName'))]",
+                "scriptContent": "$key = $args[0];$name = $args[1]; $container = $args[2];$DeploymentScriptOutputs = @{};$intermediate = ./main.ps1 $key $name $container;$DeploymentScriptOutputs['intermediate'] = $intermediate",
+                "supportingScriptUris": [
+                    "[format('https://efferentdev.blob.core.windows.net/smartlinkarmdefault/armtest-scripts/main.ps1{0}', reference('generateSasToken').outputs.token)]",
+                    "[format('https://efferentdev.blob.core.windows.net/smartlinkarmdefault/armtest-scripts/certGenOriginal.ps1{0}', reference('generateSasToken').outputs.token)]",
+                    "[format('https://efferentdev.blob.core.windows.net/smartlinkarmdefault/armtest-scripts/openssl_root_ca.cnf{0}',reference('generateSasToken').outputs.token)]"
+                ],
+                "storageAccountSettings": {
+                    "storageAccountKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts',  variables('storageAccountName')), '2021-08-01').keys[0].value]",
+                    "storageAccountName": "[variables('storageAccountName')]"
+                },
+                "timeout": "PT30M",
+                "cleanupPreference": "OnExpiration",
+                "retentionInterval": "P1D"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
+                "[resourceId('Microsoft.Resources/deploymentScripts','generateSasToken')]"
+            ]
+        },
+        {
+            "type": "Microsoft.Devices/provisioningServices",
+            "apiVersion": "2022-02-05",
+            "name": "[parameters('provisioningServiceName')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "[parameters('skuName')]",
+                "capacity": "[parameters('skuUnits')]"
+            },
+            "properties": {
+                "iotHubs": [
+                    {
+                        "connectionString": "[format('HostName={0};SharedAccessKeyName={1};SharedAccessKey={2}', reference(resourceId('Microsoft.Devices/IotHubs', variables('iotHubName'))).hostName, variables('iotHubKey'), listkeys(resourceId('Microsoft.Devices/IotHubs', variables('iotHubName')), '2021-07-02').value[0].primaryKey)]",
+                        "location": "[parameters('location')]"
+                    }
+                ]
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Devices/IotHubs', variables('iotHubName'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Devices/provisioningServices/certificates",
+            "apiVersion": "2022-02-05",
+            "name": "[concat(parameters('provisioningServiceName'), '/intermediate')]",
+            "properties": {
+                "isVerified": true,
+                "certificate": "[reference('generateCertificate','2020-10-01').outputs.intermediate]"
+            },
+            "dependsOn": [
+
+                "[resourceId('Microsoft.Devices/provisioningServices', parameters('provisioningServiceName'))]",
+                "[resourceId('Microsoft.Resources/deploymentScripts','generateCertificate')]"
+            ]
+        },
+        {
+            "condition": "[equals(variables('optionsPlanAppService'),'true')]",
+            "name": "[variables('appServicePlanPortalName')]",
+            "type": "Microsoft.Web/serverfarms",
+            "apiVersion": "2021-03-01",
+            "location": "[variables('locationGroup')]",
+            "sku": {
+                "name": "[variables('skuweb')]"
+            },
+            "kind": "[variables('kind')]",
+            "properties": {
+                "name": "[variables('appServicePlanPortalName')]",
+                "workerSize": "0",
+                "workerSizeId": "0",
+                "numberOfWorkers": "1",
+                "reserved": true,
+                "zoneRedundant": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2021-03-01",
+            "name": "[variables('webAppName')]",
+            "location": "[variables('locationGroup')]",
+
+            "properties": {
+                "name": "[variables('webAppName')]",
+                "serverFarmId": "[variables('serverFarmId')]",
+                "siteConfig": {
+
+                    "appSettings": [
+                        {
+                            "name": "AZURE_CLIENT_ID",
+                            "value": "c4720ffb-1d3d-4f9e-bec3-66dec1f1da71"
+                        },
+                        {
+                            "name": "AZURE_CLIENT_SECRET",
+                            "value": "dP67Q~ReRsexrZ8EtGE02nnB4Lc_kfEiHCSb7"
+                        },
+                        {
+                            "name": "AZURE_TENANT_ID",
+                            "value": "02ecab7f-85de-4d13-9c86-db5eefd90ee2"
+                        }
+                    ],
+
+                    "alwaysOn": false,
+                    "httpsOnly": true
+                },
+                "clientAffinityEnabled": false
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanPortalName'))]"
+            ]
+        }
+    ]
+}
