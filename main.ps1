@@ -3,6 +3,7 @@ param(
 		[string] $userFtp, 
 		[string] $passFtp
 )
+Invoke-WebRequest 'https://raw.githubusercontent.com/AlfonsoDiaz98/netmodulescontainer/master/samplefile.txt' -OutFile 'samplefile.txt';
 $urlFtp = $urlFtps.Replace('ftps', 'ftp');
 
 $currentPath = Get-Location;
