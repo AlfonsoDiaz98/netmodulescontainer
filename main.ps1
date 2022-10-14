@@ -25,13 +25,4 @@ finally {
     $requestStream.Dispose();
 }
 
-try {
-    $response = [System.Net.FtpWebResponse]($request.GetResponse());
-}
-finally {
-    if($null -ne $response){
-        $response.Close();
-    }
-}
-
 
