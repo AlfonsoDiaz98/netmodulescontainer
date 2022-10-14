@@ -25,5 +25,11 @@ finally {
     $requestStream.Dispose();
 }
 
-
-
+try {
+    $response = $request.GetResponse();
+}
+finally {
+    if ($null -ne $response) {
+        $response.Close()
+    }
+}
