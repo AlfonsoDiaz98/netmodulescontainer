@@ -5,7 +5,7 @@ param(
 )
 $urlFtp = $urlFtps.Replace('ftps', 'ftp');
 $currentPath = Get-Location;
-$filePath =  "$currentPath/samplefile.txt";
+$filePath =  "$currentPath\samplefile.txt";
 $file = Get-Item -Path $filePath;
 $uri = New-Object System.Uri("$urlFtp/$($file.Name)");
 
@@ -24,5 +24,6 @@ try {
 finally {
     $requestStream.Dispose();
 }
+
 
 
