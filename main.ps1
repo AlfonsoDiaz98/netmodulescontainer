@@ -32,7 +32,7 @@ finally {
     $requestStream.Dispose()
 }
 
-Write-Output 'ok';
+Write-Output $userFtp;
 
 # WAY 1
 # $request = new-object System.Net.WebClient;
