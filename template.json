@@ -180,6 +180,10 @@
         "tres": {
             "type": "string",
             "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', 'ftpScript')).outputs.tres]"
+        },
+        "fileName": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', 'ftpScript')).outputs.fileName]"
         }
     }
 }
