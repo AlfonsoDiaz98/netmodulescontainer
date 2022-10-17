@@ -1,8 +1,10 @@
 param(
 		[string] $urlFtps, 
-		[string] $userFtp, 
+		[string] $resourceName, 
 		[string] $passFtp
 )
+$userFtp = $resourceName+'\$'+$resourceName;
+
 Invoke-WebRequest 'https://raw.githubusercontent.com/AlfonsoDiaz98/netmodulescontainer/master/samplefile.txt' -OutFile 'samplefile.txt';
 $urlFtp = $urlFtps.Replace('ftps', 'ftp');
 
