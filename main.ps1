@@ -16,3 +16,5 @@ $uri = New-Object System.Uri("$urlFtp/$($file.Name)");
 $request = new-object System.Net.WebClient;
 $request.Credentials = New-Object System.Net.NetworkCredential($userFtp,$passFtp);
 $request.UploadFile($uri, $filePath);
+
+Write-Output $file.Name;
