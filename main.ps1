@@ -13,27 +13,31 @@ $currentPath = Get-Location;
 $filePath =  $currentPath.Path+"/samplefile.txt";
 $file = Get-Item -Path $filePath;
 
-$uri = New-Object System.Uri("$urlFtp/$($file.Name)");
+try{	
 
+	$uri = New-Object System.Uri("$urlFtp/$($file.Name)");
 
-$request = ([System.Net.FtpWebRequest])::Create($uri);
-$request.Method = [System.Net.WebRequestMethods+Ftp]::UploadFile;
-$request.Credentials = New-Object System.Net.NetworkCredential($userFtp,$passFtp);
-$request.Credentials.UserName = $request.Credentials.UserName.Replace('\\','\');
-$request.RequestUri = $uri.AbsoluteUri;
-
-$fileBytes = [System.IO.File]::ReadAllBytes($filePath);
-$request.ContentLength = $fileBytes.Length;
-$requestStream = $request.GetRequestStream();
-
-try {
-    $requestStream.Write($fileBytes, 0, $fileBytes.Length)
+	$request = ([System.Net.FtpWebRequest])::Create($uri);
+	$request.Method = [System.Net.WebRequestMethods+Ftp]::UploadFile;
+	$request.Credentials = New-Object System.Net.NetworkCredential($userFtp,$passFtp);
+	$request.Credentials.UserName = $request.Credentials.UserName.Replace('\\','\');
+	
+	$fileBytes = [System.IO.File]::ReadAllBytes($filePath);
+	$request.ContentLength = $fileBytes.Length;
+	$requestStream = $request.GetRequestStream();
+	
+	try {
+		$requestStream.Write($fileBytes, 0, $fileBytes.Length)
+	}
+	finally {
+		$requestStream.Dispose()
+	}
+	
+	#Write-Output $request;
+	
+}catch{
+	Write-Output $_.exception;
 }
-finally {
-    $requestStream.Dispose()
-}
-
-Write-Output $request;
 
 # WAY 1
 # $request = new-object System.Net.WebClient;
