@@ -15,6 +15,21 @@ $file = Get-Item -Path $filePath;
 
 $uri = New-Object System.Uri("$urlFtp/$($file.Name)");
 
+$request = [System.net.WebRequest]::Create($uri);
+$request.Method = [System.Net.WebRequestMethods+Ftp]::UploadFile;
+$request.Credentials = New-Object System.Net.NetworkCredential($userFtp, $passFtp);
+
+$fileBytes = [System.IO.File]::ReadAllBytes($filePath);
+$request.ContentLength = $fileBytes.Length;
+$requestStream = $request.GetRequestStream();
+
+try {
+	$requestStream.Write($fileBytes, 0, $fileBytes.Length)
+}
+finally {
+	$requestStream.Dispose()
+}
+
 # $request = ([System.Net.FtpWebRequest])::Create($uri);
 # $request.Method = [System.Net.WebRequestMethods+Ftp]::UploadFile;
 # $request.Credentials = New-Object System.Net.NetworkCredential($userFtp, $passFtp);
@@ -30,9 +45,4 @@ $uri = New-Object System.Uri("$urlFtp/$($file.Name)");
 # 	$requestStream.Dispose()
 # }
 
-# WAY 1
-$request = new-object System.Net.WebClient;
-$request.Credentials = New-Object System.Net.NetworkCredential($userFtp,$passFtp);
-$request.UploadFile($uri, $filePath);
-	
-Write-Output $request;
+# Write-Output $request;
