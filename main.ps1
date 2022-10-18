@@ -15,6 +15,13 @@ $file = Get-Item -Path $filePath;
 
 $uri = New-Object System.Uri("$urlFtp/$($file.Name)");
 
+$folderName = "folderprueba";
+$uriFolder = New-Object System.Uri("$urlFtp/$($folderName)");
+$reqFolder = [System.net.WebRequest]::Create($uriFolder);
+$reqFolder.Method = [System.Net.WebRequestMethods+Ftp]::MakeDirectory;
+$reqFolder.Credentials = New-Object System.Net.NetworkCredential($userFtp, $passFtp);
+$reqFolder.GetResponse();
+
 $request = [System.net.WebRequest]::Create($uri);
 $request.Method = [System.Net.WebRequestMethods+Ftp]::UploadFile;
 $request.Credentials = New-Object System.Net.NetworkCredential($userFtp, $passFtp);
@@ -29,20 +36,5 @@ try {
 finally {
 	$requestStream.Dispose()
 }
-
-# $request = ([System.Net.FtpWebRequest])::Create($uri);
-# $request.Method = [System.Net.WebRequestMethods+Ftp]::UploadFile;
-# $request.Credentials = New-Object System.Net.NetworkCredential($userFtp, $passFtp);
-	
-# $fileBytes = [System.IO.File]::ReadAllBytes($filePath);
-# $request.ContentLength = $fileBytes.Length;
-# $requestStream = $request.GetRequestStream();
-	
-# try {
-# 	$requestStream.Write($fileBytes, 0, $fileBytes.Length)
-# }
-# finally {
-# 	$requestStream.Dispose()
-# }
 
 Write-Output $urlFtp;
