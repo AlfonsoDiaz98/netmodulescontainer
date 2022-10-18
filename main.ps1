@@ -19,7 +19,6 @@ $uri = New-Object System.Uri("$urlFtp/$($file.Name)");
 $request = ([System.Net.FtpWebRequest])::Create($uri);
 $request.Method = [System.Net.WebRequestMethods+Ftp]::UploadFile;
 $request.Credentials = New-Object System.Net.NetworkCredential($userFtp,$passFtp);
-$request.EnableSsl = $true;
 
 $fileBytes = [System.IO.File]::ReadAllBytes($filePath);
 $request.ContentLength = $fileBytes.Length;
@@ -32,7 +31,7 @@ finally {
     $requestStream.Dispose()
 }
 
-Write-Output $userFtp;
+Write-Output $request;
 
 # WAY 1
 # $request = new-object System.Net.WebClient;
