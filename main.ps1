@@ -4,17 +4,9 @@ param(
 	[string] $passFtp
 )
 $userFtp = $resourceName + '\$' + $resourceName;
-
-#Invoke-WebRequest 'https://raw.githubusercontent.com/AlfonsoDiaz98/netmodulescontainer/master/samplefile.txt' -OutFile 'samplefile.txt';
-
 $urlFtp = $urlFtps.Replace('ftps', 'ftp');
-$currentPath = Get-Location;
 
-$filePath = $currentPath.Path + "/samplefile.txt";
-$file = Get-Item -Path $filePath;
-
-$uri = New-Object System.Uri("$urlFtp/$($file.Name)");
-
+#crear carpeta
 $folderName = "folderprueba";
 $uriFolder = New-Object System.Uri("$urlFtp/$($folderName)");
 $reqFolder = [System.net.WebRequest]::Create($uriFolder);
@@ -22,7 +14,12 @@ $reqFolder.Method = [System.Net.WebRequestMethods+Ftp]::MakeDirectory;
 $reqFolder.Credentials = New-Object System.Net.NetworkCredential($userFtp, $passFtp);
 $reqFolder.GetResponse();
 
-#METODO 2
+#subir archivo
+$currentPath = Get-Location;
+
+$filePath = $currentPath.Path + "/samplefile.txt";
+$file = Get-Item -Path $filePath;
+$uri = New-Object System.Uri("$urlFtp/$($file.Name)");
 
 $requestFile = new-object System.Net.WebClient
 $requestFile.Credentials = New-Object System.Net.NetworkCredential($userftp, $passFtp)
