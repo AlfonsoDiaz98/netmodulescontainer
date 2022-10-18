@@ -45,4 +45,4 @@ finally {
 # 	$requestStream.Dispose()
 # }
 
-# Write-Output $request;
+Write-Output $request;
