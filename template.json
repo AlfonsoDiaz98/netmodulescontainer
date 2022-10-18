@@ -182,7 +182,7 @@
             "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', 'ftpScript')).outputs.tres]"
         },
         "fileName": {
-            "type": "string",
+            "type": "array",
             "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', 'ftpScript')).outputs.fileName]"
         }
     }

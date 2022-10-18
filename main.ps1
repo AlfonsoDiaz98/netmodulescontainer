@@ -22,19 +22,27 @@ $reqFolder.Method = [System.Net.WebRequestMethods+Ftp]::MakeDirectory;
 $reqFolder.Credentials = New-Object System.Net.NetworkCredential($userFtp, $passFtp);
 $reqFolder.GetResponse();
 
-$request = [System.net.WebRequest]::Create($uri);
-$request.Method = [System.Net.WebRequestMethods+Ftp]::UploadFile;
-$request.Credentials = New-Object System.Net.NetworkCredential($userFtp, $passFtp);
+#METODO 2
 
-$fileBytes = [System.IO.File]::ReadAllBytes($filePath);
-$request.ContentLength = $fileBytes.Length;
-$requestStream = $request.GetRequestStream();
+$requestFile = new-object System.Net.WebClient
+$requestFile.Credentials = New-Object System.Net.NetworkCredential($userftp, $passFtp)
+$requestFile.UploadFile($uri, $filePath)
 
-try {
-	$requestStream.Write($fileBytes, 0, $fileBytes.Length)
-}
-finally {
-	$requestStream.Dispose()
-}
+
+#METODO 1
+# $request = [System.net.WebRequest]::Create($uri);
+# $request.Method = [System.Net.WebRequestMethods+Ftp]::UploadFile;
+# $request.Credentials = New-Object System.Net.NetworkCredential($userFtp, $passFtp);
+
+# $fileBytes = [System.IO.File]::ReadAllBytes($filePath);
+# $request.ContentLength = $fileBytes.Length;
+# $requestStream = $request.GetRequestStream();
+
+# try {
+# 	$requestStream.Write($fileBytes, 0, $fileBytes.Length)
+# }
+# finally {
+# 	$requestStream.Dispose()
+# }
 
 Write-Output $urlFtp;
