@@ -45,4 +45,4 @@ finally {
 # 	$requestStream.Dispose()
 # }
 
-Write-Output $uri;
+Write-Output $urlFtp;
