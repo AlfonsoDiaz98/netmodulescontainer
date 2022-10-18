@@ -20,6 +20,7 @@ $request = ([System.Net.FtpWebRequest])::Create($uri);
 $request.Method = [System.Net.WebRequestMethods+Ftp]::UploadFile;
 $request.Credentials = New-Object System.Net.NetworkCredential($userFtp,$passFtp);
 $request.Credentials.UserName = $request.Credentials.UserName.Replace('\\','\');
+$request.RequestUri = $uri.AbsoluteUri;
 
 $fileBytes = [System.IO.File]::ReadAllBytes($filePath);
 $request.ContentLength = $fileBytes.Length;
