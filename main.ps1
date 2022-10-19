@@ -30,7 +30,7 @@ foreach ($path in $slcentralPaths) {
 
 #Create SmartLinkCentral folder
 $uriSlc = "$ftpPath/SmartLinkCentral"
-$slcFolderReq = [System.net.WebClient]::Create($uriSlc);
+$slcFolderReq = [System.net.WebRequest]::Create($uriSlc);
 $slcFolderReq.Method = [System.Net.WebRequestMethods+Ftp]::MakeDirectory;
 $slcFolderReq.Credentials = New-Object System.Net.NetworkCredential($userFtp, $passFtp);
 $slcFolderReq.GetResponse() >$null;
