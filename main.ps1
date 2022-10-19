@@ -34,7 +34,7 @@ try{
 	$slcFolderReq = [System.net.WebRequest]::Create($uriSlc);
 	$slcFolderReq.Method = [System.Net.WebRequestMethods+Ftp]::MakeDirectory;
 	$slcFolderReq.Credentials = New-Object System.Net.NetworkCredential($userFtp, $passFtp);
-	$res = $slcFolderReq.GetResponse();
+	$res = $slcFolderReq.GetResponse() >$null;
 	$res.Dispose();
 
 	#Create ftp folder structure
@@ -51,7 +51,7 @@ try{
 		$reqFolder = [System.net.WebRequest]::Create($uriFolder);
 		$reqFolder.Method = [System.Net.WebRequestMethods+Ftp]::MakeDirectory;
 		$reqFolder.Credentials = $credential;
-		$reqFolder.GetResponse();
+		$reqFolder.GetResponse() >$null;
 	}
 
 	#Upload files from local to ftp
