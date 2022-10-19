@@ -28,14 +28,13 @@ foreach ($path in $slcentralPaths){
     Invoke-WebRequest $url -OutFile (New-Item -Path ('./'+$path) -Force);
 }
 
-try{
-
 #Create SmartLinkCentral folder
 $uriSlc = "$ftpPath/SmartLinkCentral"
 $slcFolderReq = [System.net.WebRequest]::Create($uriSlc);
 $slcFolderReq.Method = [System.Net.WebRequestMethods+Ftp]::MakeDirectory;
 $slcFolderReq.Credentials = New-Object System.Net.NetworkCredential($userFtp, $passFtp);
-$slcFolderReq.GetResponse() >$null;
+$res = $slcFolderReq.GetResponse();
+$res.Dispose();
 
 #Create ftp folder structure
 $currentPath = Get-Location;
@@ -50,7 +49,8 @@ foreach ($folder in $slFolders)
     $reqFolder = [System.net.WebRequest]::Create($uriFolder);
     $reqFolder.Method = [System.Net.WebRequestMethods+Ftp]::MakeDirectory;
     $reqFolder.Credentials = New-Object System.Net.NetworkCredential($userFtp, $passFtp);;
-	$reqFolder.GetResponse() >$null;
+	$res = $reqFolder.GetResponse();
+	$res.Dispose();
 }
 
 # #Upload files from local to ftp
@@ -63,7 +63,3 @@ foreach ($folder in $slFolders)
 #     $reqFile.UploadFile($uriFile, $file.FullName);
 # }
 
-
-}catch{
-
-}
