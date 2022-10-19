@@ -54,12 +54,12 @@ foreach ($folder in $slFolders) {
 	$reqFolder.GetResponse() >$null;
 }
 
-# #Upload files from local to ftp
-# $slFiles = $slFilesAndFolders | Where-Object { !$_.PSIsContainer };
-# $reqFile = new-object System.Net.WebClient;
-# $reqFile.Credentials = $credentials;
+#Upload files from local to ftp
+$slFiles = $slFilesAndFolders | Where-Object { !$_.PSIsContainer };
+$reqFile = new-object System.Net.WebClient;
+$reqFile.Credentials = $credentials;
 
-# foreach ($file in $slFiles) {
-# 	$uriFile = $file.FullName.Replace($currentPath, $ftpPath);
-# 	$reqFile.UploadFile($uriFile, $file.FullName);
-# }
+foreach ($file in $slFiles) {
+	$uriFile = $file.FullName.Replace($currentPath, $ftpPath);
+	$reqFile.UploadFile($uriFile, $file.FullName);
+}
