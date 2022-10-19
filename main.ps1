@@ -64,8 +64,8 @@ try{
 		$reqFile.UploadFile($uriFile, $file.FullName);
 	}
 
-	Write-Host 'Success';
+	Write-Output 'Success';
 }catch{
-	Write-Host 'Catch';
+	Write-Output 'Catch';
 }
 
