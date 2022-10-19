@@ -56,10 +56,11 @@ foreach ($folder in $slFolders)
 #Upload files from local to ftp
 $slFiles = $slFilesAndFolders | Where-Object{!$_.PSIsContainer};
 
+$filesCredentials = New-Object System.Net.NetworkCredential($userFtp, $passFtp);
 foreach($file in $slFiles){
     $uriFile = $file.FullName.Replace($currentPath, $ftpPath);
-	$reqFile = new-object System.Net.WebClient
-	$reqFile.Credentials = $credentials
+	$reqFile = new-object System.Net.WebClient;
+	$reqFile.Credentials = $filesCredentials;
     $reqFile.UploadFile($uriFile, $file.FullName);
 }
 
