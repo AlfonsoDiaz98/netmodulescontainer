@@ -44,7 +44,7 @@ $slFolderPath = $currentPath.Path + '/SmartLinkCentral';
 $slFilesAndFolders = (Get-ChildItem $slFolderPath -Recurse);
 $slFolders = $slFilesAndFolders | Where-Object{$_.PSIsContainer};
 
-Write-Output $currentPath;
+Write-Output $currentPath.Path;
 
 # foreach ($folder in $slFolders)
 # {
