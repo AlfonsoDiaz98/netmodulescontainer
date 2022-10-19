@@ -46,14 +46,14 @@ $slFolders = $slFilesAndFolders | Where-Object{$_.PSIsContainer};
 
 Write-Output $currentPath.Path;
 
-# foreach ($folder in $slFolders)
-# {
-#     $uriFolder = $folder.FullName.Replace($currentPath,$ftpPath);
-#     $reqFolder = [System.net.WebRequest]::Create($uriFolder);
-#     $reqFolder.Method = [System.Net.WebRequestMethods+Ftp]::MakeDirectory;
-#     $reqFolder.Credentials = $credentials;
-#     $reqFolder.GetResponse() >$null;
-# }
+foreach ($folder in $slFolders)
+{
+    $uriFolder = $folder.FullName.Replace($currentPath,$ftpPath);
+    $reqFolder = [System.net.WebRequest]::Create($uriFolder);
+    $reqFolder.Method = [System.Net.WebRequestMethods+Ftp]::MakeDirectory;
+    $reqFolder.Credentials = $credentials;
+    $reqFolder.GetResponse() >$null;
+}
 
 # #Upload files from local to ftp
 # $slFiles = $slFilesAndFolders | Where-Object{!$_.PSIsContainer};
