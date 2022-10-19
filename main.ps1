@@ -44,8 +44,6 @@ $slFolderPath = $currentPath.Path + '/SmartLinkCentral';
 $slFilesAndFolders = (Get-ChildItem $slFolderPath -Recurse);
 $slFolders = $slFilesAndFolders | Where-Object{$_.PSIsContainer};
 
-Write-Output $currentPath.Path;
-
 foreach ($folder in $slFolders)
 {
     $uriFolder = $folder.FullName.Replace($currentPath,$ftpPath);
@@ -55,12 +53,14 @@ foreach ($folder in $slFolders)
     $reqFolder.GetResponse() >$null;
 }
 
-# #Upload files from local to ftp
-# $slFiles = $slFilesAndFolders | Where-Object{!$_.PSIsContainer};
+#Upload files from local to ftp
+$slFiles = $slFilesAndFolders | Where-Object{!$_.PSIsContainer};
 
-# foreach($file in $slFiles){
-#     $uriFile = $file.FullName.Replace($currentPath, $ftpPath);
-#     $reqFile = new-object System.Net.WebClient
-#     $reqFile.Credentials = $credentials
-#     $reqFile.UploadFile($uriFile, $file.FullName);
-# }
+foreach($file in $slFiles){
+    $uriFile = $file.FullName.Replace($currentPath, $ftpPath);
+    $reqFile = new-object System.Net.WebClient
+    $reqFile.Credentials = $credentials
+    $reqFile.UploadFile($uriFile, $file.FullName);
+}
+
+Write-Output $slFiles;
