@@ -28,12 +28,14 @@ foreach ($path in $slcentralPaths){
     Invoke-WebRequest $url -OutFile (New-Item -Path ('./'+$path) -Force);
 }
 
+$credentials = New-Object System.Net.NetworkCredential($userFtp, $passFtp);
+
 #Create SmartLinkCentral folder
 $uriSlc = "$ftpPath/SmartLinkCentral"
 $slcFolderReq = [System.net.WebRequest]::Create($uriSlc);
 $slcFolderReq.Method = [System.Net.WebRequestMethods+Ftp]::MakeDirectory;
-$slcFolderReq.Credentials = New-Object System.Net.NetworkCredential($userFtp, $passFtp);
-$slcFolderReq.GetResponse();
+$slcFolderReq.Credentials = $credentials
+$slcFolderReq.GetResponse() >$null;
 
 #Create ftp folder structure
 $currentPath = Get-Location;
@@ -42,13 +44,15 @@ $slFolderPath = $currentPath.Path + '/SmartLinkCentral';
 $slFilesAndFolders = (Get-ChildItem $slFolderPath -Recurse);
 $slFolders = $slFilesAndFolders | Where-Object{$_.PSIsContainer};
 
+Write-Output $slFolders;
+
 foreach ($folder in $slFolders)
 {
     $uriFolder = $folder.FullName.Replace($currentPath,$ftpPath);
     $reqFolder = [System.net.WebRequest]::Create($uriFolder);
     $reqFolder.Method = [System.Net.WebRequestMethods+Ftp]::MakeDirectory;
-    $reqFolder.Credentials = New-Object System.Net.NetworkCredential($userFtp, $passFtp);
-    $reqFolder.GetResponse();
+    $reqFolder.Credentials = $credentials;
+    $reqFolder.GetResponse() >$null;
 }
 
 #Upload files from local to ftp
@@ -57,6 +61,6 @@ $slFiles = $slFilesAndFolders | Where-Object{!$_.PSIsContainer};
 foreach($file in $slFiles){
     $uriFile = $file.FullName.Replace($currentPath, $ftpPath);
     $reqFile = new-object System.Net.WebClient
-    $reqFile.Credentials = New-Object System.Net.NetworkCredential($userFtp, $passFtp)
+    $reqFile.Credentials = $credentials
     $reqFile.UploadFile($uriFile, $file.FullName);
 }
