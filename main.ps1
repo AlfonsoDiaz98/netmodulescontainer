@@ -49,6 +49,7 @@ foreach ($folder in $slFolders) {
 	$reqFolder.Method = [System.Net.WebRequestMethods+Ftp]::MakeDirectory;
 	$reqFolder.Credentials = $credential;
 	$reqFolder.GetResponse() >$null;
+	$reqFolder = $null;
 }
 
 #Upload files from local to ftp
