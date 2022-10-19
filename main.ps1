@@ -28,6 +28,8 @@ foreach ($path in $slcentralPaths){
     Invoke-WebRequest $url -OutFile (New-Item -Path ('./'+$path) -Force);
 }
 
+try{
+
 #Create SmartLinkCentral folder
 $uriSlc = "$ftpPath/SmartLinkCentral"
 $slcFolderReq = [System.net.WebRequest]::Create($uriSlc);
@@ -61,3 +63,7 @@ foreach ($folder in $slFolders)
 #     $reqFile.UploadFile($uriFile, $file.FullName);
 # }
 
+
+}catch{
+
+}
