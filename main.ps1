@@ -8,8 +8,6 @@ $ftpPath = $urlFtps.Replace('ftps', 'ftp');
 $userFtp = $resourceName;
 $credentials = New-Object System.Net.NetworkCredential($userFtp, $passFtp);
 
-Write-Output ($credentials);
-
 #Download smart link central
 $storageName = 'efferentdev';
 $storageKey = 'izikb23/CF62pq1J1RKG/RkhgDD7Stt52v6hpXxP3WFxiXacKNFKHTQ8By3eCzD3RukVZhkLlTsvSuJNzFjYCg==';
@@ -60,7 +58,9 @@ foreach ($folder in $slFolders) {
 
 #Upload files from local to ftp
 $slFiles = $slFilesAndFolders | Where-Object { !$_.PSIsContainer };
-	
+
+Write-Output ($slFiles);
+
 $reqFile = new-object System.Net.WebClient;
 $reqFile.Credentials = $credentials
 foreach ($file in $slFiles) {
