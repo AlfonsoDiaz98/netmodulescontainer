@@ -38,29 +38,29 @@ $slcFolderReq.Method = [System.Net.WebRequestMethods+Ftp]::MakeDirectory;
 $slcFolderReq.Credentials = $credentials;
 $slcFolderReq.GetResponse() >$null;
 
-# #Create ftp folder structure
-# $currentPath = Get-Location;
+#Create ftp folder structure
+$currentPath = Get-Location;
 
-# $slFolderPath = $currentPath.Path + '/SmartLinkCentral';
-# $slFilesAndFolders = (Get-ChildItem $slFolderPath -Recurse);
-# $slFolders = $slFilesAndFolders | Where-Object { $_.PSIsContainer };
+$slFolderPath = $currentPath.Path + '/SmartLinkCentral';
+$slFilesAndFolders = (Get-ChildItem $slFolderPath -Recurse);
+$slFolders = $slFilesAndFolders | Where-Object { $_.PSIsContainer };
 
 
-# foreach ($folder in $slFolders) {
-# 	$uriFolder = $folder.FullName.Replace($currentPath, $ftpPath);
-# 	$webRequest = [System.net.WebRequest]::Create($uriFolder);
-# 	$reqFolder = [System.Net.FtpWebRequest]$webRequest;
-# 	$reqFolder.Method = [System.Net.WebRequestMethods+Ftp]::MakeDirectory;
-# 	$reqFolder.Credentials = $credentials;
-# 	$reqFolder.GetResponse() >$null;
-# }
+foreach ($folder in $slFolders) {
+	$uriFolder = $folder.FullName.Replace($currentPath, $ftpPath);
+	$webRequest = [System.net.WebRequest]::Create($uriFolder);
+	$reqFolder = [System.Net.FtpWebRequest]$webRequest;
+	$reqFolder.Method = [System.Net.WebRequestMethods+Ftp]::MakeDirectory;
+	$reqFolder.Credentials = $credentials;
+	$reqFolder.GetResponse() >$null;
+}
 
-# #Upload files from local to ftp
-# $slFiles = $slFilesAndFolders | Where-Object { !$_.PSIsContainer };
-# $reqFile = new-object System.Net.WebClient;
-# $reqFile.Credentials = New-Object System.Net.NetworkCredential('webApp-webapptesteffe\$webApp-webapptesteffe', $passFtp);
+#Upload files from local to ftp
+$slFiles = $slFilesAndFolders | Where-Object { !$_.PSIsContainer };
+$reqFile = new-object System.Net.WebClient;
+$reqFile.Credentials = $credentials
 
-# foreach ($file in $slFiles) {
-# 	$uriFile = $file.FullName.Replace($currentPath, $ftpPath);
-# 	$reqFile.UploadFile($uriFile, $file.FullName);
-# }
+foreach ($file in $slFiles) {
+	$uriFile = $file.FullName.Replace($currentPath, $ftpPath);
+	$reqFile.UploadFile($uriFile, $file.FullName);
+}
