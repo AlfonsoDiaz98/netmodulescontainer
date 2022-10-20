@@ -34,11 +34,6 @@ function UploadFileRecursive{
 	}
 }
 
-#wrong calls array
-$wrong = @();
-Write-Output ($wrong);
-#end
-
 $ftpPath = $urlFtps.Replace('ftps', 'ftp');
 $userFtp = $resourceName + '\$' + $resourceName;
 $credentials = New-Object System.Net.NetworkCredential($userFtp, $passFtp);
