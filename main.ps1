@@ -48,8 +48,7 @@ $slFolders = $slFilesAndFolders | Where-Object { $_.PSIsContainer };
 
 foreach ($folder in $slFolders) {
 	$uriFolder = $folder.FullName.Replace($currentPath, $ftpPath);
-	$webRequest = [System.net.WebRequest]::Create($uriFolder);
-	$reqFolder = [System.Net.FtpWebRequest]$webRequest;
+	$reqFolder = [System.net.WebRequest]::Create($uriFolder);
 	$reqFolder.Method = [System.Net.WebRequestMethods+Ftp]::MakeDirectory;
 	$reqFolder.Credentials = $credentials;
 	$reqFolder.GetResponse() >$null;
