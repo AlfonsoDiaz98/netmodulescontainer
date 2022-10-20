@@ -48,7 +48,8 @@ Write-Output ($credentials);
 
 foreach ($folder in $slFolders) {
 	$uriFolder = $folder.FullName.Replace($currentPath, $ftpPath);
-	$reqFolder = [System.net.WebRequest]::Create($uriFolder);
+	$webRequest = [System.net.WebRequest]::Create($uriFolder);
+	$reqFolder = [System.Net.FtpWebRequest]$webRequest;
 	$reqFolder.Method = [System.Net.WebRequestMethods+Ftp]::MakeDirectory;
 	$reqFolder.Credentials = New-Object System.Net.NetworkCredential('webApp-webapptesteffe\$webApp-webapptesteffe', $passFtp);
 	$reqFolder.GetResponse() >$null;
