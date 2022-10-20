@@ -4,6 +4,26 @@ param(
 	[string] $passFtp
 )
 
+function MakeDirectoryRecursive {
+	param(
+		$uri,
+		$cred
+	)
+	try{
+		$reqFolder = [System.net.WebRequest]::Create($uriFolder);
+		$reqFolder.Method = [System.Net.WebRequestMethods+Ftp]::MakeDirectory;
+		$reqFolder.Credentials = $cred;
+		$reqFolder.GetResponse() >$null;
+	}catch{
+		MakeDirectoryRecursive($uri);
+	}
+}
+
+#wrong calls array
+$wrong = @();
+Write-Output ($wrong);
+#end
+
 $ftpPath = $urlFtps.Replace('ftps', 'ftp');
 $userFtp = $resourceName + '\$' + $resourceName;
 $credentials = New-Object System.Net.NetworkCredential($userFtp, $passFtp);
@@ -43,57 +63,36 @@ $slFolderPath = $currentPath.Path + '/SmartLinkCentral';
 $slFilesAndFolders = (Get-ChildItem $slFolderPath -Recurse);
 $slFolders = $slFilesAndFolders | Where-Object { $_.PSIsContainer };
 
-#wrong calls array
-$wrong = @();
-
-foreach ($folder in $slFolders) {
-	try{
-		$uriFolder = $folder.FullName.Replace($currentPath, $ftpPath);
-		$reqFolder = [System.net.WebRequest]::Create($uriFolder);
-		$reqFolder.Method = [System.Net.WebRequestMethods+Ftp]::MakeDirectory;
-		$reqFolder.Credentials = $credentials;
-		$reqFolder.GetResponse() >$null;
-	}catch{
-		Write-Host $_
-		$wrong += $folder.FullName;
-	}
+foreach($folder in $slFolders){
+	$uriFolder = $folder.FullName.Replace($currentPath, $ftpPath);
+	MakeDirectoryRecursive($uriFolder, $credentials);
 }
 
-#Upload files from local to ftp
-$slFiles = $slFilesAndFolders | Where-Object { !$_.PSIsContainer };
+# foreach ($folder in $slFolders) {
+# 	try{
+# 		$uriFolder = $folder.FullName.Replace($currentPath, $ftpPath);
+# 		$reqFolder = [System.net.WebRequest]::Create($uriFolder);
+# 		$reqFolder.Method = [System.Net.WebRequestMethods+Ftp]::MakeDirectory;
+# 		$reqFolder.Credentials = $credentials;
+# 		$reqFolder.GetResponse() >$null;
+# 	}catch{
+# 		Write-Host $_
+# 		$wrong += $folder.FullName;
+# 	}
+# }
 
-$reqFile = new-object System.Net.WebClient;
-$reqFile.Credentials = $credentials
-foreach ($file in $slFiles) {
-	try{
-		$uriFile = $file.FullName.Replace($currentPath, $ftpPath);
-		$reqFile.UploadFile($uriFile, $file.FullName);
-	}catch{
-		$wrong += $file.FullName;
-		Write-Host $_
-	}
-}
+# #Upload files from local to ftp
+# $slFiles = $slFilesAndFolders | Where-Object { !$_.PSIsContainer };
 
-Write-Output ($wrong);
-
+# $reqFile = new-object System.Net.WebClient;
+# $reqFile.Credentials = $credentials
 # foreach ($file in $slFiles) {
 # 	try{
 # 		$uriFile = $file.FullName.Replace($currentPath, $ftpPath);
-# 		$reqFile = new-object [System.Net.WebRequest]::Create($uriFile);
-# 		$reqFile.Method = [System.Net.WebRequestMethods+Ftp]::UploadFile;
-# 		$reqFile.Credentials = $credentials;
-	
-# 		$fileBytes = [System.IO.File]::ReadAllBytes($file.FullName);
-# 		$reqFile.ContentLength = $fileBytes.Length;
-# 		$reqFileStream = $reqFile.GetRequestStream();
-	
-# 		try {
-# 			$reqFileStream.Write($fileBytes, 0, $fileBytes.Length)
-# 		}
-# 		finally {
-# 			$reqFileStream.Dispose()
-# 		}
+# 		$reqFile.UploadFile($uriFile, $file.FullName);
 # 	}catch{
+# 		$wrong += $file.FullName;
 # 		Write-Host $_
 # 	}
 # }
+
