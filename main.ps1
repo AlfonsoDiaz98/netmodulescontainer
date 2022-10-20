@@ -61,31 +61,35 @@ $slFiles = $slFilesAndFolders | Where-Object { !$_.PSIsContainer };
 
 Write-Output ($slFiles);
 
-$reqFile = new-object System.Net.WebClient;
-$reqFile.Credentials = $credentials
 foreach ($file in $slFiles) {
 	try{
 		$uriFile = $file.FullName.Replace($currentPath, $ftpPath);
-		$reqFile.UploadFile($uriFile, $file.FullName);
+		$reqFile = new-object [System.Net.WebRequest]::Create($uriFile);
+		$reqFile.Method = [System.Net.WebRequestMethods+Ftp]::UploadFile;
+		$reqFile.Credentials = $credentials;
+	
+		$fileBytes = [System.IO.File]::ReadAllBytes($file.FullName);
+		$reqFile.ContentLength = $fileBytes.Length;
+		$reqFileStream = $reqFile.GetRequestStream();
+	
+		try {
+			$reqFileStream.Write($fileBytes, 0, $fileBytes.Length)
+		}
+		finally {
+			$reqFileStream.Dispose()
+		}
 	}catch{
 		Write-Host $_
 	}
 }
 
+# $reqFile = new-object System.Net.WebClient;
+# $reqFile.Credentials = $credentials
 # foreach ($file in $slFiles) {
-# 	$uriFile = $file.FullName.Replace($currentPath, $ftpPath);
-# 	$reqFile = new-object [System.Net.WebRequest]::Create($uriFile);
-# 	$reqFile.Method = [System.Net.WebRequestMethods+Ftp]::UploadFile;
-# 	$reqFile.Credentials = $credentials;
-
-# 	$fileBytes = [System.IO.File]::ReadAllBytes($file.FullName);
-# 	$reqFile.ContentLength = $fileBytes.Length;
-# 	$reqFileStream = $reqFile.GetRequestStream();
-
-# 	try {
-# 		$reqFileStream.Write($fileBytes, 0, $fileBytes.Length)
-# 	}
-# 	finally {
-# 		$reqFileStream.Dispose()
+# 	try{
+# 		$uriFile = $file.FullName.Replace($currentPath, $ftpPath);
+# 		$reqFile.UploadFile($uriFile, $file.FullName);
+# 	}catch{
+# 		Write-Host $_
 # 	}
 # }
