@@ -78,6 +78,7 @@ foreach($folder in $slFolders){
 	MakeDirectoryRecursive $uriFolder $credentials;
 }
 
+$slFiles = $slFilesAndFolders | Where-Object { !$_.PSIsContainer };
 foreach($file in $slFiles){
 	$uriFile = $file.FullName.Replace($currentPath, $ftpPath);
 	UploadFileRecursive $uriFile $file.FullName $credentials;
