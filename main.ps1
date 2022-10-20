@@ -37,6 +37,7 @@ function UploadFileRecursive{
 $ftpPath = $urlFtps.Replace('ftps', 'ftp');
 $userFtp = $resourceName + '\$' + $resourceName;
 $credentials = New-Object System.Net.NetworkCredential($userFtp, $passFtp);
+$mainFolderName = 'SmartLinkCentral';
 
 #Download smart link central
 $storageName = 'efferentdev';
@@ -47,12 +48,12 @@ $context = New-AzStorageContext -StorageAccountName $storageName -StorageAccount
 $expiry = [DateTime]::Today.AddDays(+1);
 $token = New-AzStorageContainerSASToken -Context $context -Name $defaultContainerName -Permission 'rl' -ExpiryTime $expiry;
 
-$url_base = 'https://efferentdev.blob.core.windows.net/smartlinkarmdefault';
+$url_base = "https://efferentdev.blob.core.windows.net/$defaultContainerName";
 $list = $url_base + $token + '&restype=container&comp=list';
 Invoke-WebRequest $list -OutFile 'smartlinkcentral.xml';
 
 [xml]$paths = Get-Content -Path './smartlinkcentral.xml';
-$slcentralPaths = $paths.EnumerationResults.Blobs.Blob.Name | Where-Object { $_ -match "SmartLinkCentral/" }
+$slcentralPaths = $paths.EnumerationResults.Blobs.Blob.Name | Where-Object { $_ -match "$mainFolderName/" }
 
 foreach ($path in $slcentralPaths) {
 	$url = $url_base + '/' + $path + $token;
@@ -60,7 +61,7 @@ foreach ($path in $slcentralPaths) {
 }
 	
 #Create SmartLinkCentral folder
-$uriSlc = "$ftpPath/SmartLinkCentral"
+$uriSlc = "$ftpPath/$mainFolderName"
 $slcFolderReq = [System.net.WebRequest]::Create($uriSlc);
 $slcFolderReq.Method = [System.Net.WebRequestMethods+Ftp]::MakeDirectory;
 $slcFolderReq.Credentials = $credentials;
@@ -69,7 +70,7 @@ $slcFolderReq.GetResponse() >$null;
 #Create ftp folder structure
 $currentPath = Get-Location;
 
-$slFolderPath = $currentPath.Path + '/SmartLinkCentral';
+$slFolderPath = "$currentPath.Path/$mainFolderName";
 $slFilesAndFolders = (Get-ChildItem $slFolderPath -Recurse);
 $slFolders = $slFilesAndFolders | Where-Object { $_.PSIsContainer };
 
@@ -83,32 +84,3 @@ foreach($file in $slFiles){
 	$uriFile = $file.FullName.Replace($currentPath, $ftpPath);
 	UploadFileRecursive $uriFile $file.FullName $credentials;
 }
-
-# foreach ($folder in $slFolders) {
-# 	try{
-# 		$uriFolder = $folder.FullName.Replace($currentPath, $ftpPath);
-# 		$reqFolder = [System.net.WebRequest]::Create($uriFolder);
-# 		$reqFolder.Method = [System.Net.WebRequestMethods+Ftp]::MakeDirectory;
-# 		$reqFolder.Credentials = $credentials;
-# 		$reqFolder.GetResponse() >$null;
-# 	}catch{
-# 		Write-Host $_
-# 		$wrong += $folder.FullName;
-# 	}
-# }
-
-# #Upload files from local to ftp
-# $slFiles = $slFilesAndFolders | Where-Object { !$_.PSIsContainer };
-
-# $reqFile = new-object System.Net.WebClient;
-# $reqFile.Credentials = $credentials
-# foreach ($file in $slFiles) {
-# 	try{
-# 		$uriFile = $file.FullName.Replace($currentPath, $ftpPath);
-# 		$reqFile.UploadFile($uriFile, $file.FullName);
-# 	}catch{
-# 		$wrong += $file.FullName;
-# 		Write-Host $_
-# 	}
-# }
-
