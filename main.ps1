@@ -30,7 +30,6 @@ foreach ($path in $slcentralPaths) {
 	$url = $url_base + '/' + $path + $token;
 	Invoke-WebRequest $url -OutFile (New-Item -Path ('./' + $path) -Force);
 }
-try{
 	
 #Create SmartLinkCentral folder
 $uriSlc = "$ftpPath/SmartLinkCentral"
@@ -48,26 +47,31 @@ $slFolders = $slFilesAndFolders | Where-Object { $_.PSIsContainer };
 
 
 foreach ($folder in $slFolders) {
-	$uriFolder = $folder.FullName.Replace($currentPath, $ftpPath);
-	$reqFolder = [System.net.WebRequest]::Create($uriFolder);
-	$reqFolder.Method = [System.Net.WebRequestMethods+Ftp]::MakeDirectory;
-	$reqFolder.Credentials = $credentials;
-	$reqFolder.GetResponse() >$null;
+	try{
+		$uriFolder = $folder.FullName.Replace($currentPath, $ftpPath);
+		$reqFolder = [System.net.WebRequest]::Create($uriFolder);
+		$reqFolder.Method = [System.Net.WebRequestMethods+Ftp]::MakeDirectory;
+		$reqFolder.Credentials = $credentials;
+		$reqFolder.GetResponse() >$null;
+	}catch{
+		Write-Host $_
+	}
 }
 
 #Upload files from local to ftp
 $slFiles = $slFilesAndFolders | Where-Object { !$_.PSIsContainer };
-
-$reqFile = new-object System.Net.WebClient;
-$reqFile.Credentials = $credentials
+	
 foreach ($file in $slFiles) {
-	$uriFile = $file.FullName.Replace($currentPath, $ftpPath);
-	$reqFile.UploadFile($uriFile, $file.FullName);
+	try{
+		$uriFile = $file.FullName.Replace($currentPath, $ftpPath);
+		$reqFile = new-object System.Net.WebClient;
+		$reqFile.Credentials = $credentials
+		$reqFile.UploadFile($uriFile, $file.FullName);
+	}catch{
+		Write-Host $_
+	}
 }
 
-}catch{
-
-}
 # foreach ($file in $slFiles) {
 # 	$uriFile = $file.FullName.Replace($currentPath, $ftpPath);
 # 	$reqFile = new-object [System.Net.WebRequest]::Create($uriFile);
