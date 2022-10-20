@@ -27,19 +27,19 @@ Invoke-WebRequest $list -OutFile 'smartlinkcentral.xml';
 [xml]$paths = Get-Content -Path './smartlinkcentral.xml';
 $slcentralPaths = $paths.EnumerationResults.Blobs.Blob.Name | Where-Object { $_ -match "SmartLinkCentral/" }
 
-# foreach ($path in $slcentralPaths) {
-# 	$url = $url_base + '/' + $path + $token;
-# 	Invoke-WebRequest $url -OutFile (New-Item -Path ('./' + $path) -Force);
-# }
+foreach ($path in $slcentralPaths) {
+	$url = $url_base + '/' + $path + $token;
+	Invoke-WebRequest $url -OutFile (New-Item -Path ('./' + $path) -Force);
+}
 
 Write-Output ($credentials);
 
-# #Create SmartLinkCentral folder
-# $uriSlc = "$ftpPath/SmartLinkCentral"
-# $slcFolderReq = [System.net.WebRequest]::Create($uriSlc);
-# $slcFolderReq.Method = [System.Net.WebRequestMethods+Ftp]::MakeDirectory;
-# $slcFolderReq.Credentials = $credentials;
-# $slcFolderReq.GetResponse() >$null;
+#Create SmartLinkCentral folder
+$uriSlc = "$ftpPath/SmartLinkCentral"
+$slcFolderReq = [System.net.WebRequest]::Create($uriSlc);
+$slcFolderReq.Method = [System.Net.WebRequestMethods+Ftp]::MakeDirectory;
+$slcFolderReq.Credentials = $credentials;
+$slcFolderReq.GetResponse() >$null;
 
 # #Create ftp folder structure
 # $currentPath = Get-Location;
