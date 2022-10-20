@@ -15,7 +15,22 @@ function MakeDirectoryRecursive {
 		$reqFolder.Credentials = $cred;
 		$reqFolder.GetResponse() >$null;
 	}catch{
-		MakeDirectoryRecursive($uri);
+		MakeDirectoryRecursive $uri $cred;
+	}
+}
+
+function UploadFileRecursive{
+	param(
+		$uri,
+		$localPath,
+		$cred
+	)
+	try{
+		$reqFile = new-object System.Net.WebClient;
+		$reqFile.Credentials = $cred;
+		$reqFile.UploadFile($uri, $localPath);
+	}catch{
+		UploadFileRecursive $uri $localPath $cred;
 	}
 }
 
@@ -65,7 +80,12 @@ $slFolders = $slFilesAndFolders | Where-Object { $_.PSIsContainer };
 
 foreach($folder in $slFolders){
 	$uriFolder = $folder.FullName.Replace($currentPath, $ftpPath);
-	MakeDirectoryRecursive($uriFolder, $credentials);
+	MakeDirectoryRecursive $uriFolder $credentials;
+}
+
+foreach($file in $slFiles){
+	$uriFile = $file.FullName.Replace($currentPath, $ftpPath);
+	UploadFileRecursive $uriFile $file.FullName $credentials;
 }
 
 # foreach ($folder in $slFolders) {
