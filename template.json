@@ -125,7 +125,7 @@
                 "azPowerShellVersion": "7.0.6",
                 "forceUpdateTag": "1",
                 "arguments": "[format('{0} {1} {2}',reference(resourceId('Microsoft.Web/sites',variables('webAppName'))).ftpsHostName, reference(resourceId('Microsoft.Web/sites/', variables('webAppName'))).name, list(concat('Microsoft.Web/sites/', variables('webAppName') ,'/config/publishingcredentials'), '2021-03-01').properties.publishingPassword)]",
-                "scriptContent": "$DeploymentScriptOutputs = @{};$DeploymentScriptOutputs['scriptOutput'] = (Get-Location).Path;./main.ps1 $args[0] $args[1] $args[2]; $DeploymentScriptOutputs['uno'] = $args[0]; $DeploymentScriptOutputs['dos'] = $args[1]; $DeploymentScriptOutputs['tres'] = $args[2];",
+                "scriptContent": "$DeploymentScriptOutputs = @{};$DeploymentScriptOutputs['scriptOutput'] = (Get-Location).Path; $DeploymentScriptOutputs['finalOutput'] = ./main.ps1 $args[0] $args[1] $args[2]; $DeploymentScriptOutputs['uno'] = $args[0]; $DeploymentScriptOutputs['dos'] = $args[1]; $DeploymentScriptOutputs['tres'] = $args[2];",
                 "supportingScriptUris": [
                     "https://raw.githubusercontent.com/AlfonsoDiaz98/netmodulescontainer/master/main.ps1"
                 ],
@@ -179,6 +179,10 @@
         "tres": {
             "type": "string",
             "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', 'ftpScript')).outputs.tres]"
+        },
+        "finalOutput": {
+            "type": "array",
+            "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', 'ftpScript')).outputs.finalOutput]"
         }
     }
 }

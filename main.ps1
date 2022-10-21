@@ -3,6 +3,10 @@ param(
 	[string] $resourceName, 
 	[string] $passFtp
 )
+
+$triesFolder = @();
+$triesFiles = @();
+
 function MakeDirectoryRecursive {
 	param(
 		$uri,
@@ -14,6 +18,7 @@ function MakeDirectoryRecursive {
 		$reqFolder.Method = [System.Net.WebRequestMethods+Ftp]::MakeDirectory;
 		$reqFolder.Credentials = $cred;
 		$reqFolder.GetResponse() >$null;
+		Write-Output $counter;
 	}
 	catch {
 		$counter += 1;
@@ -88,11 +93,13 @@ $slFolders = $slFilesAndFolders | Where-Object { $_.PSIsContainer };
 
 foreach ($folder in $slFolders) {
 	$uriFolder = $folder.FullName.Replace($currentPath, $ftpPath);
-	MakeDirectoryRecursive $uriFolder $credentials;
+	$triesFolder += MakeDirectoryRecursive $uriFolder $credentials;
 }
 	
 $slFiles = $slFilesAndFolders | Where-Object { !$_.PSIsContainer };
 foreach ($file in $slFiles) {
 	$uriFile = $file.FullName.Replace($currentPath, $ftpPath);
-	UploadFileRecursive $uriFile $file.FullName $credentials;
+	$triesFiles += UploadFileRecursive $uriFile $file.FullName $credentials;
 }
+
+Write-Output $triesFolder $triesFiles;
