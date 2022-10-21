@@ -13,7 +13,7 @@ function MakeDirectoryRecursive{
 		$reqFolder = [System.net.WebRequest]::Create($uri);
 		$reqFolder.Method = [System.Net.WebRequestMethods+Ftp]::MakeDirectory;
 		$reqFolder.Credentials = $cred;
-		$reqFolder.GetResponse();
+		$reqFolder.GetResponse() >$null;
 	}catch{
 		$counter += 1;
 		if ($counter -le 5){
