@@ -3,43 +3,47 @@ param(
 	[string] $resourceName, 
 	[string] $passFtp
 )
-function MakeDirectoryRecursive{
+function MakeDirectoryRecursive {
 	param(
 		$uri,
 		$cred,
 		$counter = 1
 	)
-	try{
+	try {
 		$reqFolder = [System.net.WebRequest]::Create($uri);
 		$reqFolder.Method = [System.Net.WebRequestMethods+Ftp]::MakeDirectory;
 		$reqFolder.Credentials = $cred;
 		$reqFolder.GetResponse() >$null;
-	}catch{
+	}
+	catch {
 		$counter += 1;
-		if ($counter -le 10){
+		if ($counter -le 10) {
 			MakeDirectoryRecursive $uri $cred $counter;
-		}else{
+		}
+		else {
 			throw "Attempt limit exceeded: $uri"
 		}
 	}
 }
 
-function UploadFileRecursive{
+function UploadFileRecursive {
 	param(
 		$uri,
 		$localPath,
 		$cred,
 		$counter = 1
 	)
-	try{
+	try {
 		$reqFile = new-object System.Net.WebClient;
 		$reqFile.Credentials = $cred;
-		$reqFile.UploadFile($uri, ($localPath+'error'));
-	}catch{
+		$reqFile.UploadFile($uri, $localPath);
+	}
+	catch {
 		$counter += 1;
-		if($counter -le 10){
+		if ($counter -le 10) {
 			UploadFileRecursive $uri $localPath $cred $counter;
-		}else{
+		}
+		else {
 			throw "Attempt limit exceeded: $uri";
 		}
 	}
@@ -82,17 +86,13 @@ $slFolderPath = "$($currentPath.Path)/$mainFolderName";
 $slFilesAndFolders = (Get-ChildItem $slFolderPath -Recurse);
 $slFolders = $slFilesAndFolders | Where-Object { $_.PSIsContainer };
 
-try{
-	foreach($folder in $slFolders){
-		$uriFolder = $folder.FullName.Replace($currentPath, $ftpPath);
-		MakeDirectoryRecursive $uriFolder $credentials;
-	}
+foreach ($folder in $slFolders) {
+	$uriFolder = $folder.FullName.Replace($currentPath, $ftpPath);
+	MakeDirectoryRecursive $uriFolder $credentials;
+}
 	
-	$slFiles = $slFilesAndFolders | Where-Object { !$_.PSIsContainer };
-	foreach($file in $slFiles){
-		$uriFile = $file.FullName.Replace($currentPath, $ftpPath);
-		UploadFileRecursive $uriFile $file.FullName $credentials;
-	}
-}catch{
-	throw
+$slFiles = $slFilesAndFolders | Where-Object { !$_.PSIsContainer };
+foreach ($file in $slFiles) {
+	$uriFile = $file.FullName.Replace($currentPath, $ftpPath);
+	UploadFileRecursive $uriFile $file.FullName $credentials;
 }
