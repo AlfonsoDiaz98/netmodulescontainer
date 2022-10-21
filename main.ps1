@@ -3,9 +3,7 @@ param(
 	[string] $resourceName, 
 	[string] $passFtp
 )
-throw 'error prueba';
-
-function MakeDirectoryRecursive {
+function MakeDirectoryRecursive{
 	param(
 		$uri,
 		$cred,
@@ -21,7 +19,7 @@ function MakeDirectoryRecursive {
 		if ($counter -le 5){
 			MakeDirectoryRecursive $uri $cred $counter;
 		}else{
-			throw "Attempt limit exceeded: $uri";
+			throw("Attempt limit exceeded: $uri");
 		}
 	}
 }
@@ -42,7 +40,7 @@ function UploadFileRecursive{
 		if($counter -le 5){
 			UploadFileRecursive $uri $localPath $cred $counter;
 		}else{
-			throw "Attempt limit exceeded: $uri";
+			throw("Attempt limit exceeded: $uri");
 		}
 	}
 }
