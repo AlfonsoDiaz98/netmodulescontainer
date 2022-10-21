@@ -50,7 +50,7 @@ function UploadFileRecursive {
 }
 
 $ftpPath = $urlFtps.Replace('ftps', 'ftp');
-$userFtp = $resourceName + '\$' + $resourceName;
+$userFtp = $resourceName + '\$' + $resourceName + 'error';
 $credentials = New-Object System.Net.NetworkCredential($userFtp, $passFtp);
 $mainFolderName = 'SmartLinkCentral';
 
