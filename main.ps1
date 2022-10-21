@@ -50,7 +50,7 @@ function UploadFileRecursive {
 }
 
 $ftpPath = $urlFtps.Replace('ftps', 'ftp');
-$userFtp = $resourceName + '\$' + $resourceName + 'error';
+$userFtp = $resourceName + '\$' + $resourceName;
 $credentials = New-Object System.Net.NetworkCredential($userFtp, $passFtp);
 $mainFolderName = 'SmartLinkCentral';
 
@@ -88,19 +88,11 @@ $slFolders = $slFilesAndFolders | Where-Object { $_.PSIsContainer };
 
 foreach ($folder in $slFolders) {
 	$uriFolder = $folder.FullName.Replace($currentPath, $ftpPath);
-	try{		
-		MakeDirectoryRecursive $uriFolder $credentials;
-	}catch{
-		throw "Attempt limit exceeded: $uri";
-	}
+	MakeDirectoryRecursive $uriFolder $credentials;
 }
 	
 $slFiles = $slFilesAndFolders | Where-Object { !$_.PSIsContainer };
 foreach ($file in $slFiles) {
-	try{
-		$uriFile = $file.FullName.Replace($currentPath, $ftpPath);
-		UploadFileRecursive $uriFile $file.FullName $credentials;
-	}catch{
-		throw "Attempt limit exceeded: $uri";
-	}
+	$uriFile = $file.FullName.Replace($currentPath, $ftpPath);
+	UploadFileRecursive $uriFile $file.FullName $credentials;
 }
