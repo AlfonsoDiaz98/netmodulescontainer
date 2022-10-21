@@ -16,10 +16,10 @@ function MakeDirectoryRecursive{
 		$reqFolder.GetResponse() >$null;
 	}catch{
 		$counter += 1;
-		if ($counter -le 5){
+		if ($counter -le 10){
 			MakeDirectoryRecursive $uri $cred $counter;
 		}else{
-			throw ('Attempt limit exceeded: ' + $uri);
+			throw "Attempt limit exceeded: $uri"
 		}
 	}
 }
@@ -37,10 +37,10 @@ function UploadFileRecursive{
 		$reqFile.UploadFile($uri, ($localPath+'error'));
 	}catch{
 		$counter += 1;
-		if($counter -le 5){
+		if($counter -le 10){
 			UploadFileRecursive $uri $localPath $cred $counter;
 		}else{
-			throw ('Attempt limit exceeded: ' + $uri);
+			throw "Attempt limit exceeded: $uri";
 		}
 	}
 }
@@ -82,13 +82,17 @@ $slFolderPath = "$($currentPath.Path)/$mainFolderName";
 $slFilesAndFolders = (Get-ChildItem $slFolderPath -Recurse);
 $slFolders = $slFilesAndFolders | Where-Object { $_.PSIsContainer };
 
-foreach($folder in $slFolders){
-	$uriFolder = $folder.FullName.Replace($currentPath, $ftpPath);
-	MakeDirectoryRecursive $uriFolder $credentials;
-}
-
-$slFiles = $slFilesAndFolders | Where-Object { !$_.PSIsContainer };
-foreach($file in $slFiles){
-	$uriFile = $file.FullName.Replace($currentPath, $ftpPath);
-	UploadFileRecursive $uriFile $file.FullName $credentials;
+try{
+	foreach($folder in $slFolders){
+		$uriFolder = $folder.FullName.Replace($currentPath, $ftpPath);
+		MakeDirectoryRecursive $uriFolder $credentials;
+	}
+	
+	$slFiles = $slFilesAndFolders | Where-Object { !$_.PSIsContainer };
+	foreach($file in $slFiles){
+		$uriFile = $file.FullName.Replace($currentPath, $ftpPath);
+		UploadFileRecursive $uriFile $file.FullName $credentials;
+	}
+}catch{
+	throw
 }
