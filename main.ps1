@@ -17,7 +17,7 @@ function MakeDirectoryRecursive {
 		$reqFolder.GetResponse() >$null;
 	}catch{
 		$counter += 1;
-		if ($counter -le 3){
+		if ($counter -le 5){
 			MakeDirectoryRecursive $uri $cred $counter;
 		}
 		throw "Attempt limit exceeded: $uri";
@@ -37,7 +37,7 @@ function UploadFileRecursive{
 		$reqFile.UploadFile($uri, $localPath);
 	}catch{
 		$counter += 1;
-		if($counter -le 3){
+		if($counter -le 5){
 			UploadFileRecursive $uri $localPath $cred $counter;
 		}
 		throw "Attempt limit exceeded: $uri";
