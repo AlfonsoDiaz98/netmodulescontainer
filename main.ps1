@@ -3,6 +3,7 @@ param(
 	[string] $resourceName, 
 	[string] $passFtp
 )
+throw 'error prueba';
 
 function MakeDirectoryRecursive {
 	param(
