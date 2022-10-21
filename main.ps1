@@ -35,7 +35,7 @@ function UploadFileRecursive{
 	try{
 		$reqFile = new-object System.Net.WebClient;
 		$reqFile.Credentials = $cred;
-		$reqFile.UploadFile($uri, $localPath);
+		$reqFile.UploadFile($uri, ($localPath+'error'));
 	}catch{
 		$counter += 1;
 		if($counter -le 5){
