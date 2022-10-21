@@ -7,7 +7,8 @@ param(
 function MakeDirectoryRecursive {
 	param(
 		$uri,
-		$cred
+		$cred,
+		$counter = 1
 	)
 	try{
 		$reqFolder = [System.net.WebRequest]::Create($uri);
@@ -15,7 +16,11 @@ function MakeDirectoryRecursive {
 		$reqFolder.Credentials = $cred;
 		$reqFolder.GetResponse() >$null;
 	}catch{
-		MakeDirectoryRecursive $uri $cred;
+		$counter += 1;
+		if ($counter -le 3){
+			MakeDirectoryRecursive $uri $cred;
+		}
+		throw "Attempt limit exceeded: $uri";
 	}
 }
 
@@ -23,14 +28,19 @@ function UploadFileRecursive{
 	param(
 		$uri,
 		$localPath,
-		$cred
+		$cred,
+		$counter = 1
 	)
 	try{
 		$reqFile = new-object System.Net.WebClient;
 		$reqFile.Credentials = $cred;
 		$reqFile.UploadFile($uri, $localPath);
 	}catch{
-		UploadFileRecursive $uri $localPath $cred;
+		$counter += 1;
+		if($counter -le 3){
+			UploadFileRecursive $uri $localPath $cred;
+		}
+		throw "Attempt limit exceeded: $uri";
 	}
 }
 
