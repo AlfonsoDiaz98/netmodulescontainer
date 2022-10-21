@@ -88,11 +88,19 @@ $slFolders = $slFilesAndFolders | Where-Object { $_.PSIsContainer };
 
 foreach ($folder in $slFolders) {
 	$uriFolder = $folder.FullName.Replace($currentPath, $ftpPath);
-	MakeDirectoryRecursive $uriFolder $credentials;
+	try{		
+		MakeDirectoryRecursive $uriFolder $credentials;
+	}catch{
+		throw "Attempt limit exceeded: $uri";
+	}
 }
 	
 $slFiles = $slFilesAndFolders | Where-Object { !$_.PSIsContainer };
 foreach ($file in $slFiles) {
-	$uriFile = $file.FullName.Replace($currentPath, $ftpPath);
-	UploadFileRecursive $uriFile $file.FullName $credentials;
+	try{
+		$uriFile = $file.FullName.Replace($currentPath, $ftpPath);
+		UploadFileRecursive $uriFile $file.FullName $credentials;
+	}catch{
+		throw "Attempt limit exceeded: $uri";
+	}
 }
