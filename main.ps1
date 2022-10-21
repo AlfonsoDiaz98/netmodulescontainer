@@ -22,7 +22,7 @@ function MakeDirectoryRecursive {
 	}
 	catch {
 		$counter += 1;
-		if ($counter -le 5) {
+		if ($counter -le 10) {
 			MakeDirectoryRecursive $uri $cred $counter;
 		}
 		else {
@@ -46,7 +46,7 @@ function UploadFileRecursive {
 	}
 	catch {
 		$counter += 1;
-		if ($counter -le 5) {
+		if ($counter -le 10) {
 			UploadFileRecursive $uri $localPath $cred $counter;
 		}
 		else {
