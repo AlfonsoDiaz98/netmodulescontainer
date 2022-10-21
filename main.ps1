@@ -80,7 +80,7 @@ $slcFolderReq.GetResponse() >$null;
 #Create ftp folder structure
 $currentPath = Get-Location;
 
-$slFolderPath = "$currentPath.Path/$mainFolderName";
+$slFolderPath = "$($currentPath.Path)/$mainFolderName";
 $slFilesAndFolders = (Get-ChildItem $slFolderPath -Recurse);
 $slFolders = $slFilesAndFolders | Where-Object { $_.PSIsContainer };
 
