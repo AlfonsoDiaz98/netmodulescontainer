@@ -18,7 +18,7 @@ function MakeDirectoryRecursive {
 	}catch{
 		$counter += 1;
 		if ($counter -le 3){
-			MakeDirectoryRecursive $uri $cred;
+			MakeDirectoryRecursive $uri $cred $counter;
 		}
 		throw "Attempt limit exceeded: $uri";
 	}
@@ -38,7 +38,7 @@ function UploadFileRecursive{
 	}catch{
 		$counter += 1;
 		if($counter -le 3){
-			UploadFileRecursive $uri $localPath $cred;
+			UploadFileRecursive $uri $localPath $cred $counter;
 		}
 		throw "Attempt limit exceeded: $uri";
 	}
