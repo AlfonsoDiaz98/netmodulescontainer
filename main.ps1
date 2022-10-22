@@ -81,25 +81,20 @@ foreach ($path in $slcentralPaths) {
 	Invoke-WebRequest $url -OutFile (New-Item -Path ('./' + $path) -Force);
 }
 	
-#Create SmartLinkCentral folder
-$uriSlc = "$ftpPath/$mainFolderName"
-MakeDirectoryRecursive $uriSlc $credentials;
-
 #Create ftp folder structure
 $currentPath = Get-Location;
-
 $slFolderPath = "$($currentPath.Path)/$mainFolderName";
 $slFilesAndFolders = (Get-ChildItem $slFolderPath -Recurse);
 $slFolders = $slFilesAndFolders | Where-Object { $_.PSIsContainer };
 
 foreach ($folder in $slFolders) {
-	$uriFolder = $folder.FullName.Replace($currentPath, $ftpPath);
+	$uriFolder = $folder.FullName.Replace($slFolderPath, $ftpPath);
 	$triesFolder += MakeDirectoryRecursive $uriFolder $credentials;
 }
 	
 $slFiles = $slFilesAndFolders | Where-Object { !$_.PSIsContainer };
 foreach ($file in $slFiles) {
-	$uriFile = $file.FullName.Replace($currentPath, $ftpPath);
+	$uriFile = $file.FullName.Replace($slFolderPath, $ftpPath);
 	$triesFiles += UploadFileRecursive $uriFile $file.FullName $credentials;
 }
 
