@@ -99,3 +99,5 @@ foreach ($file in $slFiles) {
 }
 
 Write-Output $triesFolder $triesFiles;
+
+Restart-AzWebApp -ResourceGroupName "testMarketPlace" -Name $resourceName;
