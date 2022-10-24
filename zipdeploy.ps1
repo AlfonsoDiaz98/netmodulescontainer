@@ -1,3 +1,5 @@
+$resourceName = $args[0];
+
 #Download smart link central
 $storageName = 'efferentdev';
 $storageKey = 'izikb23/CF62pq1J1RKG/RkhgDD7Stt52v6hpXxP3WFxiXacKNFKHTQ8By3eCzD3RukVZhkLlTsvSuJNzFjYCg==';

@@ -124,7 +124,8 @@
             "properties": {
                 "azPowerShellVersion": "7.0.6",
                 "forceUpdateTag": "1",
-                "scriptContent": "./zipdeploy.ps1;",
+                "arguments":"[variables('webAppName')]",
+                "scriptContent": "./zipdeploy.ps1 $args[0];",
                 "supportingScriptUris": [
                     "https://raw.githubusercontent.com/AlfonsoDiaz98/netmodulescontainer/master/zipdeploy.ps1"
                 ],
