@@ -88,7 +88,6 @@
                 "name": "[variables('webAppName')]",
                 "serverFarmId": "[variables('serverFarmId')]",
                 "siteConfig": {
-
                     "appSettings": [
                         {
                             "name": "AZURE_CLIENT_ID",
@@ -103,11 +102,15 @@
                             "value": "02ecab7f-85de-4d13-9c86-db5eefd90ee2"
                         }
                     ],
-
+                    "appCommandLine": "dotnet SmartLinkCentral.API.dll",
                     "alwaysOn": false,
                     "httpsOnly": true,
                     "ftpsState": "AllAllowed",
-                    "publishingUsername": "smartlinkpublishinguser"
+                    "netFrameworkVersion": "v4.0",
+                    "linuxFxVersion": "DOTNETCORE|6.0",
+                    "http20Enabled": false,
+                    "minTlsVersion": "1.2",
+                    "scmMinTlsVersion": "1.2"
                 },
                 "clientAffinityEnabled": false
             },
@@ -124,10 +127,10 @@
             "properties": {
                 "azPowerShellVersion": "7.0.6",
                 "forceUpdateTag": "1",
-                "arguments":"[variables('webAppName')]",
-                "scriptContent": "./zipdeploy.ps1 $args[0];",
+                "arguments": "[format('{0} {1} {2}',reference(resourceId('Microsoft.Web/sites',variables('webAppName'))).ftpsHostName, reference(resourceId('Microsoft.Web/sites/', variables('webAppName'))).name, list(concat('Microsoft.Web/sites/', variables('webAppName') ,'/config/publishingcredentials'), '2021-03-01').properties.publishingPassword)]",
+                "scriptContent": "$DeploymentScriptOutputs = @{};$DeploymentScriptOutputs['scriptOutput'] = (Get-Location).Path; $DeploymentScriptOutputs['finalOutput'] = ./main.ps1 $args[0] $args[1] $args[2]; $DeploymentScriptOutputs['uno'] = $args[0]; $DeploymentScriptOutputs['dos'] = $args[1]; $DeploymentScriptOutputs['tres'] = $args[2];",
                 "supportingScriptUris": [
-                    "https://raw.githubusercontent.com/AlfonsoDiaz98/netmodulescontainer/master/zipdeploy.ps1"
+                    "https://raw.githubusercontent.com/AlfonsoDiaz98/netmodulescontainer/master/main.ps1"
                 ],
                 "storageAccountSettings": {
                     "storageAccountKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts',  variables('storageAccountName')), '2021-08-01').keys[0].value]",
@@ -142,7 +145,54 @@
                 "[resourceId('Microsoft.Web/sites',variables('webAppName'))]"
             ]
          }
-        // {
+    ],
+    "outputs": {
+        "userFtp": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.Web/sites', variables('webAppName'))).ftpUsername]"
+        },
+        "ftpHost": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.Web/sites', variables('webAppName'))).ftpsHostName]"
+        },
+        "ftpPassword": {
+            "type": "string",
+            "value": "[list(concat('Microsoft.Web/sites/', variables('webAppName') ,'/config/publishingcredentials'), '2021-03-01').properties.publishingPassword]"
+        },
+        "referenceObject": {
+            "type": "object",
+            "value": "[reference(resourceId('Microsoft.Web/sites', variables('webAppName')))]"
+        },
+        "listObject": {
+            "type": "object",
+            "value": "[list(concat('Microsoft.Web/sites/', variables('webAppName') ,'/config/publishingcredentials'), '2021-03-01')]"
+        },
+        "scriptOutput": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', 'ftpScript')).outputs.scriptOutput]"
+        },
+        "uno": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', 'ftpScript')).outputs.uno]"
+        },
+        "dos": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', 'ftpScript')).outputs.dos]"
+        },
+        "tres": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', 'ftpScript')).outputs.tres]"
+        },
+        "finalOutput": {
+            "type": "array",
+            "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', 'ftpScript')).outputs.finalOutput]"
+        }
+    }
+}
+
+
+
+// {
         //     "type": "Microsoft.Resources/deploymentScripts",
         //     "apiVersion": "2020-10-01",
         //     "name": "ftpScript",
@@ -151,10 +201,10 @@
         //     "properties": {
         //         "azPowerShellVersion": "7.0.6",
         //         "forceUpdateTag": "1",
-        //         "arguments": "[format('{0} {1} {2}',reference(resourceId('Microsoft.Web/sites',variables('webAppName'))).ftpsHostName, reference(resourceId('Microsoft.Web/sites/', variables('webAppName'))).name, list(concat('Microsoft.Web/sites/', variables('webAppName') ,'/config/publishingcredentials'), '2021-03-01').properties.publishingPassword)]",
-        //         "scriptContent": "$DeploymentScriptOutputs = @{};$DeploymentScriptOutputs['scriptOutput'] = (Get-Location).Path; $DeploymentScriptOutputs['finalOutput'] = ./main.ps1 $args[0] $args[1] $args[2]; $DeploymentScriptOutputs['uno'] = $args[0]; $DeploymentScriptOutputs['dos'] = $args[1]; $DeploymentScriptOutputs['tres'] = $args[2];",
+        //         "arguments":"[variables('webAppName')]",
+        //         "scriptContent": "./zipdeploy.ps1 $args[0];",
         //         "supportingScriptUris": [
-        //             "https://raw.githubusercontent.com/AlfonsoDiaz98/netmodulescontainer/master/main.ps1"
+        //             "https://raw.githubusercontent.com/AlfonsoDiaz98/netmodulescontainer/master/zipdeploy.ps1"
         //         ],
         //         "storageAccountSettings": {
         //             "storageAccountKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts',  variables('storageAccountName')), '2021-08-01').keys[0].value]",
@@ -169,47 +219,3 @@
         //         "[resourceId('Microsoft.Web/sites',variables('webAppName'))]"
         //     ]
         //  }
-    ]
-    // "outputs": {
-    //     "userFtp": {
-    //         "type": "string",
-    //         "value": "[reference(resourceId('Microsoft.Web/sites', variables('webAppName'))).ftpUsername]"
-    //     },
-    //     "ftpHost": {
-    //         "type": "string",
-    //         "value": "[reference(resourceId('Microsoft.Web/sites', variables('webAppName'))).ftpsHostName]"
-    //     },
-    //     "ftpPassword": {
-    //         "type": "string",
-    //         "value": "[list(concat('Microsoft.Web/sites/', variables('webAppName') ,'/config/publishingcredentials'), '2021-03-01').properties.publishingPassword]"
-    //     },
-    //     "referenceObject": {
-    //         "type": "object",
-    //         "value": "[reference(resourceId('Microsoft.Web/sites', variables('webAppName')))]"
-    //     },
-    //     "listObject": {
-    //         "type": "object",
-    //         "value": "[list(concat('Microsoft.Web/sites/', variables('webAppName') ,'/config/publishingcredentials'), '2021-03-01')]"
-    //     },
-    //     "scriptOutput": {
-    //         "type": "string",
-    //         "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', 'ftpScript')).outputs.scriptOutput]"
-    //     },
-    //     "uno": {
-    //         "type": "string",
-    //         "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', 'ftpScript')).outputs.uno]"
-    //     },
-    //     "dos": {
-    //         "type": "string",
-    //         "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', 'ftpScript')).outputs.dos]"
-    //     },
-    //     "tres": {
-    //         "type": "string",
-    //         "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', 'ftpScript')).outputs.tres]"
-    //     },
-    //     "finalOutput": {
-    //         "type": "array",
-    //         "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', 'ftpScript')).outputs.finalOutput]"
-    //     }
-    // }
-}

@@ -25,4 +25,4 @@ foreach ($path in $slcentralPaths) {
 $currentPath = Get-Location;
 $zipName = 'slcentral.zip';
 Compress-Archive -Path "$currentPath/$mainFolderName" -DestinationPath $zipName;
-Publish-AzWebApp -ResourceGroupName 'testMarketplace' -Name $resourceName -ArchivePath "$currentPath/$zipName";
+Publish-AzWebApp -ResourceGroupName 'testMarketplace' -Name 'webApp-webapptesteffe' -ArchivePath "C:\Users\alfon\OneDrive\Escritorio\netmodules\slcentral.zip";
